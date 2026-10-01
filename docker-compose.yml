@@ -1,0 +1,61 @@
+# Local full stack: Postgres + backend + two dedicated servers.
+# Brings up enough to run real matchmaking against real containers on one machine.
+#
+#   docker compose up -d db backend
+#   docker compose run --rm backend node dist/migrate.js
+#   docker compose up -d gameserver-1 gameserver-2
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: blindsight
+      POSTGRES_PASSWORD: blindsight
+      POSTGRES_DB: blindsight
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blindsight"]
+      interval: 5s
+      retries: 10
+
+  backend:
+    build: ./Backend
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgres://blindsight:blindsight@db:5432/blindsight
+      JWT_SECRET: dev-jwt-secret-change-me
+      SERVER_KEY: dev-server-key-change-me
+      MATCH_SIZE: 6
+      MATCH_MIN_SIZE: 4
+    ports: ["8080:8080"]
+
+  gameserver-1:
+    build:
+      context: .
+      dockerfile: Server/Dockerfile
+    depends_on: [backend]
+    environment:
+      BS_PORT: 7777
+      BS_REGION: local
+      BS_SERVER_KEY: dev-server-key-change-me
+      BS_BACKEND_URL: http://backend:8080
+      BS_ADVERTISE_ADDR: 127.0.0.1:7777
+    ports: ["7777:7777/udp"]
+
+  gameserver-2:
+    build:
+      context: .
+      dockerfile: Server/Dockerfile
+    depends_on: [backend]
+    environment:
+      BS_PORT: 7778
+      BS_REGION: local
+      BS_SERVER_KEY: dev-server-key-change-me
+      BS_BACKEND_URL: http://backend:8080
+      BS_ADVERTISE_ADDR: 127.0.0.1:7778
+    ports: ["7778:7778/udp"]
+
+volumes:
+  pgdata:
