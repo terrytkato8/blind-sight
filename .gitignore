@@ -1,0 +1,44 @@
+﻿# ---------- Unreal Engine ----------
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+.vs/
+.vscode/
+.idea/
+*.sln
+*.suo
+*.sdf
+*.opensdf
+*.opendb
+*.VC.db
+*.xcodeproj
+*.xcworkspace
+Content/Developers/
+Content/Collections/
+*_BuiltData.uasset
+
+# ---------- Backend (Node) ----------
+Backend/node_modules/
+Backend/dist/
+npm-debug.log*
+yarn-error.log*
+
+# ---------- Secrets - never commit ----------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ---------- Packaged / cooked output ----------
+LinuxServer/
+Packaged/
+Archive/
+*.pak
+
+# ---------- OS noise ----------
+.DS_Store
+Thumbs.db
+desktop.ini
