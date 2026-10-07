@@ -9,6 +9,7 @@
 #include "EngineUtils.h"
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
+#include "Camera/CameraComponent.h"
 
 ABSHunterCharacter::ABSHunterCharacter()
 {
@@ -16,6 +17,10 @@ ABSHunterCharacter::ABSHunterCharacter()
 	VisionPostProcess->SetupAttachment(GetRootComponent());
 	VisionPostProcess->bUnbound = true;
 	VisionPostProcess->bEnabled = false;	// enabled only for the local Hunter in BeginPlay
+	
+	GetMesh()->SetOwnerNoSee(true); //Hunter won't see their own body
+	Camera->bUsePawnControlRotation = true;
+	bUseControllerRotationYaw = true;
 }
 
 void ABSHunterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -28,7 +33,6 @@ void ABSHunterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 void ABSHunterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if (IsLocallyControlled()) ApplyVisionSettings();
 }
 
 void ABSHunterCharacter::ApplyVisionSettings()
@@ -52,6 +56,13 @@ void ABSHunterCharacter::OnAbilitySystemReady()
 	if (!ASC || AmmoDelegateHandle.IsValid()) return;
 	AmmoDelegateHandle = ASC->GetGameplayAttributeValueChangeDelegate(UBSAttributeSet::GetAmmoAttribute())
 		.AddLambda([this](const FOnAttributeChangeData& Data) { OnAmmoChanged.Broadcast(Data.NewValue); });
+}
+
+void ABSHunterCharacter::NotifyControllerChanged()
+{
+	Super::NotifyControllerChanged();
+	
+	if (IsLocallyControlled()) ApplyVisionSettings();
 }
 
 void ABSHunterCharacter::Input_Primary()

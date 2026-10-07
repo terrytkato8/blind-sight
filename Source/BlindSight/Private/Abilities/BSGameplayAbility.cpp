@@ -6,8 +6,9 @@
 UBSGameplayAbility::UBSGameplayAbility()
 {
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
-	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::ServerOnly;
-	NetSecurityPolicy = EGameplayAbilityNetSecurityPolicy::ServerOnlyExecution;
+	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
+	NetSecurityPolicy = EGameplayAbilityNetSecurityPolicy::ClientOrServer;
+	
 }
 
 ABSCharacterBase* UBSGameplayAbility::GetBSCharacter() const

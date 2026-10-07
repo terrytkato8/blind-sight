@@ -25,6 +25,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Movement") float SprintSpeed = 720.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Movement") float CrouchSpeed = 200.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Interaction") float InteractRange = 220.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<class USpringArmComponent> CameraBoom;
 
 	UFUNCTION(BlueprintPure, Category = "Blind Sight") EBSNoiseTier GetNoiseTier() const { return NoiseTier; }
 	UFUNCTION(BlueprintPure, Category = "Blind Sight") bool IsSprinting() const { return bSprinting; }

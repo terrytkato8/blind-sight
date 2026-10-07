@@ -54,6 +54,7 @@ protected:
 	virtual void Input_Primary() override;		// fire
 	virtual void Input_Secondary() override;	// pulse
 	virtual void OnAbilitySystemReady() override;
+	virtual void NotifyControllerChanged() override;
 
 	UPROPERTY(ReplicatedUsing = OnRep_PulseReadyTime) float PulseReadyServerTime = 0.f;
 	UFUNCTION() void OnRep_PulseReadyTime() {}
