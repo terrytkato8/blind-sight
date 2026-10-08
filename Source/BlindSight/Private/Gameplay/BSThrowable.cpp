@@ -14,7 +14,6 @@ ABSThrowable::ABSThrowable()
 	Mesh->SetNotifyRigidBodyCollision(true);
 	Mesh->SetCollisionProfileName(TEXT("PhysicsActor"));
 	Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);	// don't let it hit the thrower
-	Mesh->SetMassOverrideInKg(NAME_None, 0.6f, true);
 }
 
 void ABSThrowable::BeginPlay()
@@ -25,6 +24,12 @@ void ABSThrowable::BeginPlay()
 		Mesh->OnComponentHit.AddDynamic(this, &ABSThrowable::OnHit);
 		SetLifeSpan(LifeSeconds);
 	}
+}
+
+void ABSThrowable::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	Mesh->SetMassOverrideInKg(NAME_None, 0.6f, true);
 }
 
 void ABSThrowable::Launch(const FVector& Velocity)

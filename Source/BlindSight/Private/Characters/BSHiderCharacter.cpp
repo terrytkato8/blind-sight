@@ -11,10 +11,27 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "EngineUtils.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 ABSHiderCharacter::ABSHiderCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	
+	//ThirdPersonCameraBoom
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->TargetArmLength = 300.f;
+	CameraBoom->SocketOffset = FVector(0.0f, 0.0f, 60.0f); //Raise camera above player
+	CameraBoom->bUsePawnControlRotation = true;
+	
+	Camera->SetupAttachment(CameraBoom,USpringArmComponent::SocketName);
+	Camera->SetRelativeLocation(FVector::ZeroVector);
+	Camera->bUsePawnControlRotation = false;
+	
+	// character turns toward movement input not the mouse look input
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 void ABSHiderCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
