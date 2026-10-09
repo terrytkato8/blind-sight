@@ -17,7 +17,7 @@ class BLINDSIGHT_API UBSGA_Pulse : public UBSGameplayAbility
 public:
 	UBSGA_Pulse();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Pulse") float CooldownSeconds = 18.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Pulse") float CooldownSeconds = 30.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Pulse") float RevealRadius = 1800.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Pulse") float RevealDuration = 1.2f;
 
