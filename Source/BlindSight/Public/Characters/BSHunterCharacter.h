@@ -50,6 +50,14 @@ public:
 
 	UPROPERTY(BlueprintAssignable) FBSOnAmmoChanged OnAmmoChanged;
 
+	//CameraArm JRB 10.8.26
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<class USpringArmComponent> CameraBoom;
+	
+	//MPC_HunterVision - ping data the PP_HunterVision material reads. Assign in BP_HunterCharacter. JRB 10.8.26
+	UPROPERTY(EditDefaultsOnly, Category = "Blind Sight|Vision")
+	TObjectPtr<class UMaterialParameterCollection> MPC_HunterVision;
+
 protected:
 	virtual void Input_Primary() override;		// fire
 	virtual void Input_Secondary() override;	// pulse

@@ -69,6 +69,9 @@ public:
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 	virtual bool ShouldSpawnAtStartSpot(AController* Player) override { return false; }
+	
+	//PlayerStart tag for differentiating between Hunter and Hider JRB 10.8.26
+	UPROPERTY() TSet<TObjectPtr<AActor>> UsedStartsThisRound;
 
 protected:
 	virtual void BeginPlay() override;

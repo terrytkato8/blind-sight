@@ -214,11 +214,14 @@ AActor* ABSGameMode::ChoosePlayerStart_Implementation(AController* Player)
 	TArray<APlayerStart*> Preferred, Fallback;
 	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
 	{
+		if (UsedStartsThisRound.Contains(*It)) continue;
 		if (It->PlayerStartTag == Want) Preferred.Add(*It);
 		else if (It->PlayerStartTag.IsNone()) Fallback.Add(*It);
 	}
-	if (Preferred.Num()) return Preferred[FMath::RandRange(0, Preferred.Num() - 1)];
-	if (Fallback.Num())  return Fallback[FMath::RandRange(0, Fallback.Num() - 1)];
+	AActor* Pick = nullptr;
+	if (Preferred.Num()) Pick = Preferred[FMath::RandRange(0, Preferred.Num() - 1)];
+	else if (Fallback.Num()) Pick = Fallback[FMath::RandRange(0, Fallback.Num() - 1)];
+	if (Pick) {UsedStartsThisRound.Add(Pick); return Pick; }
 	return Super::ChoosePlayerStart_Implementation(Player);
 }
 
@@ -258,7 +261,10 @@ void ABSGameMode::StartRound()
 	GS->SetRoundTimer(0.f);
 
 	for (TActorIterator<ABSThrowableSpawnPoint> It(GetWorld()); It; ++It) It->ResetStock();
-
+	
+	//ResetPlayerStartTags
+	UsedStartsThisRound.Reset();
+	
 	RespawnAll(Players);
 	for (ABSPlayerState* PS : Players) InitRoundAttributes(PS, TotalHidersThisRound);
 

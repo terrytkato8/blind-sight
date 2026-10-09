@@ -10,6 +10,10 @@
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMaterialLibrary.h"
+#include "Materials/MaterialParameterCollection.h"
 
 ABSHunterCharacter::ABSHunterCharacter()
 {
@@ -18,9 +22,22 @@ ABSHunterCharacter::ABSHunterCharacter()
 	VisionPostProcess->bUnbound = true;
 	VisionPostProcess->bEnabled = false;	// enabled only for the local Hunter in BeginPlay
 	
-	GetMesh()->SetOwnerNoSee(true); //Hunter won't see their own body
-	Camera->bUsePawnControlRotation = true;
-	bUseControllerRotationYaw = true;
+	
+	
+		//ThirdPersonCameraBoom
+    	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+    	CameraBoom->SetupAttachment(RootComponent);
+    	CameraBoom->TargetArmLength = 175.f;
+    	CameraBoom->SocketOffset = FVector(0.0f, 60.0f, 60.0f); //Raise camera above player
+    	CameraBoom->bUsePawnControlRotation = true;
+    	
+    	Camera->SetupAttachment(CameraBoom,USpringArmComponent::SocketName);
+    	Camera->SetRelativeLocation(FVector::ZeroVector);
+    	Camera->bUsePawnControlRotation = false;
+    	
+    	// character turns toward movement input not the mouse look input
+    	bUseControllerRotationYaw = true;
+    	GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
 void ABSHunterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -106,6 +123,17 @@ void ABSHunterCharacter::ClientPulseReveal_Implementation(float Radius, float Du
 			RevealedActors.Add(*It);
 		}
 	}
+	if (MPC_HunterVision)
+	{
+		UKismetMaterialLibrary::SetVectorParameterValue(this, MPC_HunterVision, TEXT("PingOrigin"),
+		                                                FLinearColor(GetActorLocation()));
+		UKismetMaterialLibrary::SetScalarParameterValue(this, MPC_HunterVision, TEXT("PingStartTime"),
+		                                                 GetWorld()->GetTimeSeconds());	
+		UKismetMaterialLibrary::SetScalarParameterValue(this, MPC_HunterVision, TEXT("PingMaxRadius"),
+		                                                 Radius);
+		UKismetMaterialLibrary::SetScalarParameterValue(this, MPC_HunterVision, TEXT("PingDuration"),
+		                                                 Duration);
+	}
 	BP_OnPulse(Radius, Duration);
 	GetWorldTimerManager().SetTimer(RevealTimer, this, &ABSHunterCharacter::ClearPulseReveal, Duration, false);
 }
@@ -120,6 +148,11 @@ void ABSHunterCharacter::ClearPulseReveal()
 		}
 	}
 	RevealedActors.Reset();
+	
+	if (MPC_HunterVision)
+	{
+		UKismetMaterialLibrary::SetScalarParameterValue(this, MPC_HunterVision, TEXT("PingMaxRadius"), 0.0f);
+	}
 }
 
 void ABSHunterCharacter::MulticastOnFired_Implementation(FVector ImpactPoint)
