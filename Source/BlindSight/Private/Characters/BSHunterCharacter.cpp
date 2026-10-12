@@ -54,16 +54,7 @@ void ABSHunterCharacter::BeginPlay()
 
 void ABSHunterCharacter::ApplyVisionSettings()
 {
-	// Baseline impairment without any material: crushed saturation + heavy vignette + near DOF.
-	// The real "short sight radius" look should come from a PP material (see README).
-	FPostProcessSettings& S = VisionPostProcess->Settings;
-	S.bOverride_VignetteIntensity = true;      S.VignetteIntensity = VignetteIntensity;
-	S.bOverride_ColorSaturation = true;        S.ColorSaturation = FVector4(Saturation, Saturation, Saturation, 1.f);
-	S.bOverride_DepthOfFieldFstop = true;      S.DepthOfFieldFstop = 0.6f;
-	S.bOverride_DepthOfFieldFocalDistance = true; S.DepthOfFieldFocalDistance = SightRadius * 0.5f;
-	S.bOverride_DepthOfFieldSensorWidth = true; S.DepthOfFieldSensorWidth = 60.f;
-	S.bOverride_AutoExposureMinBrightness = true; S.AutoExposureMinBrightness = 0.03f;
-	S.bOverride_AutoExposureMaxBrightness = true; S.AutoExposureMaxBrightness = 0.03f;
+	//Needed to connect PP_HunterVision to the players on Vision Post Process JRB 10.12.26
 	VisionPostProcess->bEnabled = true;
 }
 
@@ -158,4 +149,11 @@ void ABSHunterCharacter::ClearPulseReveal()
 void ABSHunterCharacter::MulticastOnFired_Implementation(FVector ImpactPoint)
 {
 	BP_OnFired(ImpactPoint);
+}
+
+//Helps with Removing Vision Blendable for the Hunters Post Processing when a Sound is generated JRB 10.12.26
+void ABSHunterCharacter::RemoveVisionBlendable(UObject* Blendable)
+{
+	if (!VisionPostProcess || !Blendable) return;
+	VisionPostProcess->Settings.WeightedBlendables.Array.RemoveAll([Blendable](const FWeightedBlendable& W) {return W.Object == Blendable;});
 }
