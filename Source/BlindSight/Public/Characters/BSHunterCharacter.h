@@ -43,7 +43,11 @@ public:
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastOnFired(FVector ImpactPoint);
-
+	
+	//VisionPostProcessHelper JRB 10.12.26
+	UFUNCTION(BlueprintCallable, Category = "Vision")
+	void RemoveVisionBlendable(UObject* Blendable);
+	
 	/** Cosmetic hooks. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Blind Sight") void BP_OnFired(FVector ImpactPoint);
 	UFUNCTION(BlueprintImplementableEvent, Category = "Blind Sight") void BP_OnPulse(float Radius, float Duration);
