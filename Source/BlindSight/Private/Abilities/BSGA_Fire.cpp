@@ -4,6 +4,7 @@
 #include "Characters/BSHiderCharacter.h"
 #include "Core/BSGameplayTags.h"
 #include "Sound/BSSoundEventSubsystem.h"
+#include "BlindSight.h"
 #include "GameFramework/BSGameMode.h"
 #include "Camera/CameraComponent.h"
 
@@ -32,7 +33,13 @@ void UBSGA_Fire::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const 
 
 	// Spend the shot first: ammo is a hard budget (GDD §4.1).
 	ModifyAttribute(UBSAttributeSet::GetAmmoAttribute(), -1.f);
-
+	
+	if (const UBSAttributeSet* Attr = GetBSAttributes())
+	{
+		UE_LOG(LogBlindSight, Log, TEXT("Fire [%s] ammo left=%0.f"),
+			ActorInfo->IsNetAuthority() ? TEXT("Server"): TEXT("Client"), Attr->GetAmmo());
+	}
+	
 	FVector Start; FRotator Rot;
 	Hunter->GetActorEyesViewPoint(Start, Rot);
 	FVector Dir = Rot.Vector();
