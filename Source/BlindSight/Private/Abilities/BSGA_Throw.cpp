@@ -34,13 +34,16 @@ void UBSGA_Throw::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 	Hider->GetActorEyesViewPoint(Eye, Rot);
 	const FVector Dir = (Rot.Vector() + FVector::UpVector * UpwardBias).GetSafeNormal();
 	const FVector SpawnLoc = Eye + Dir * 60.f;
-
-	FActorSpawnParameters SP;
-	SP.Owner = Hider; SP.Instigator = Hider;
-	SP.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	if (ABSThrowable* Obj = World->SpawnActor<ABSThrowable>(ThrowableClass, SpawnLoc, Dir.Rotation(), SP))
+	
+	if (HasAuthority(&ActivationInfo)) //server only; clients get the replicated copy
 	{
-		Obj->Launch(Dir * ThrowSpeed);
+		FActorSpawnParameters SP;
+		SP.Owner = Hider; SP.Instigator = Hider;
+		SP.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		if (ABSThrowable* Obj = World->SpawnActor<ABSThrowable>(ThrowableClass, SpawnLoc, Dir.Rotation(), SP))
+		{
+			Obj->Launch(Dir * ThrowSpeed);
+		}
 	}
 
 	// Quieter ping at the throw point (GDD §6.3) — the impact ping comes from the projectile.

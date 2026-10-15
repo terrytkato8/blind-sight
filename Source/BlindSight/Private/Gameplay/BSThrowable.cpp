@@ -1,4 +1,6 @@
 #include "Gameplay/BSThrowable.h"
+
+#include "BlindSight.h"
 #include "Sound/BSSoundEventSubsystem.h"
 #include "Components/StaticMeshComponent.h"
 
@@ -19,10 +21,11 @@ ABSThrowable::ABSThrowable()
 void ABSThrowable::BeginPlay()
 {
 	Super::BeginPlay();
+	SpawnTime = GetWorld()->GetTimeSeconds();
 	if (HasAuthority())
 	{
 		Mesh->OnComponentHit.AddDynamic(this, &ABSThrowable::OnHit);
-		SetLifeSpan(LifeSeconds);
+		
 	}
 }
 
@@ -32,15 +35,26 @@ void ABSThrowable::OnConstruction(const FTransform& Transform)
 	Mesh->SetMassOverrideInKg(NAME_None, 0.6f, true);
 }
 
+void ABSThrowable::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UE_LOG(LogBlindSight, Log, TEXT("Throwable %s [%s] gone after %.1fs at z=%0.f(reason %d)"),
+		*GetName(), GetNetMode() == NM_Client ? TEXT("Client") : TEXT("Server"),
+		GetWorld()->GetTimeSeconds() - SpawnTime, GetActorLocation().Z, int32(EndPlayReason));
+	Super::EndPlay(EndPlayReason);
+}
+
 void ABSThrowable::Launch(const FVector& Velocity)
 {
 	if (!HasAuthority()) return;
+	bThrown = true;
+	SetLifeSpan(LifeSeconds);
 	Mesh->SetPhysicsLinearVelocity(Velocity);
 	Mesh->SetPhysicsAngularVelocityInDegrees(FMath::VRand() * 360.f);
 }
 
 void ABSThrowable::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (!bThrown) return;   // placed props settling on the floor don't ping the hunter
 	if (!HasAuthority()) return;
 	if (Mesh->GetPhysicsLinearVelocity().Size() < MinImpactSpeed && ImpactCount > 0) return;
 

@@ -80,7 +80,8 @@ void UBSSoundEventSubsystem::EmitSoundEvent(const FBSSoundEvent& Event)
 		if (!PS || PS->GetBSRole() != EBSRole::Hunter || PS->IsEliminated()) continue;
 		APawn* Pawn = PC->GetPawn();
 		if (!Pawn) continue;
-
+		if (Event.Instigator.Get() == Pawn && Event.Type !=  EBSSoundEventType::HunterPulse) continue;
+		
 		FVector ListenerLoc = Pawn->GetActorLocation() + FVector(0.f, 0.f, 60.f);	// ear height
 
 		bool bOccluded = false;

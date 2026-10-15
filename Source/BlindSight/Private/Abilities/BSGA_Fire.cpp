@@ -7,6 +7,7 @@
 #include "BlindSight.h"
 #include "GameFramework/BSGameMode.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/BSGameState.h"
 
 UBSGA_Fire::UBSGA_Fire()
 {
@@ -19,6 +20,11 @@ UBSGA_Fire::UBSGA_Fire()
 bool UBSGA_Fire::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
 {
 	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags)) return false;
+	// Only fire while the hunt is live (not during head start, results or after the match)
+	const AActor* Avatar = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr;
+	const ABSGameState* GS = Avatar ? Avatar->GetWorld()->GetGameState<ABSGameState>() : nullptr;
+	if (!GS || GS->GetPhase() != EBSRoundPhase::InProgress) return false;
+	
 	const UBSAttributeSet* Attr = GetBSAttributes();
 	return Attr && Attr->GetAmmo() >= 1.f;
 }
