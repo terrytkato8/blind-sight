@@ -260,7 +260,7 @@ void ABSGameMode::StartRound()
 	GS->SetRoundNumber(RoundNumber);
 	GS->SetHunter(CurrentHunterPS, NextPS);
 	GS->SetHiderCounts(RemainingHiders, TotalHidersThisRound);
-	GS->SetRoundTimer(0.f);
+	GS->SetRoundTimer(GS->GetServerWorldTimeSeconds()+HeadStartSeconds); //Show the head-start countdown on the HUD; Begin Hunt replaces this with the round
 
 	for (TActorIterator<ABSThrowableSpawnPoint> It(GetWorld()); It; ++It) It->ResetStock();
 	
