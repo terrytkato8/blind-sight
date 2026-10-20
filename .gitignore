@@ -1,5 +1,9 @@
 ﻿# ---------- Unreal Engine ----------
-Binaries/
+Binaries/*
+!Binaries/Win64/
+Binaries/Win64/*
+!Binaries/Win64/UnrealEditor-BlindSight.dll
+!Binaries/Win64/UnrealEditor.modules
 DerivedDataCache/
 Intermediate/
 Saved/
