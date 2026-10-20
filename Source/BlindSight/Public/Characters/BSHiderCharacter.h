@@ -52,11 +52,14 @@ protected:
 	virtual void Input_SprintStart() override;
 	virtual void Input_SprintStop() override;
 	virtual void Input_CrouchToggle() override;
-
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+	
+	
 	UFUNCTION(Server, Reliable) void ServerSetSprinting(bool bNewSprinting);
 	UFUNCTION(Server, Reliable) void ServerToggleCrouch();
 	UFUNCTION(Server, Reliable) void ServerInteract();
-
+	
 	void UpdateNoiseTier();
 
 	UPROPERTY(ReplicatedUsing = OnRep_NoiseTier) EBSNoiseTier NoiseTier = EBSNoiseTier::Still;

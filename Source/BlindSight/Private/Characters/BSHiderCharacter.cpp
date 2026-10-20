@@ -76,7 +76,28 @@ void ABSHiderCharacter::Input_Primary()
 void ABSHiderCharacter::Input_Secondary()   { ServerInteract(); }
 void ABSHiderCharacter::Input_SprintStart() { ServerSetSprinting(true); }
 void ABSHiderCharacter::Input_SprintStop()  { ServerSetSprinting(false); }
-void ABSHiderCharacter::Input_CrouchToggle(){ ServerToggleCrouch(); }
+void ABSHiderCharacter::Input_CrouchToggle()
+	{
+	if (bEliminated) return;
+	if (bIsCrouched)	{UnCrouch();}
+	else				{Crouch(); ServerSetSprinting(false); }
+	}
+
+void ABSHiderCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+	if (HasAuthority())
+		if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+			ASC->AddLooseGameplayTag(BSTags::State_Crouching);
+}
+
+void ABSHiderCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+	if (HasAuthority())
+		if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+			ASC->RemoveLooseGameplayTag(BSTags::State_Crouching);
+}
 
 void ABSHiderCharacter::ServerSetSprinting_Implementation(bool bNewSprinting)
 {

@@ -156,7 +156,9 @@ void ABSGameMode::Logout(AController* Exiting)
 			}
 			else if (PS->GetBSRole() == EBSRole::Hider && !PS->IsEliminated())
 			{
-				HandleHiderEliminated(PS, nullptr);		// leaving counts as caught for round bookkeeping
+				// The last hider leaving isn't caught, so call the rund off (no points for the Hunter) JRB 10.14.26
+				if (RemainingHiders <=1) EndRound(EBSRoundEndReason::Aborted);
+				else HandleHiderEliminated(PS, nullptr);	// leaving counts as caught for round bookkeeping
 			}
 		}
 	}
@@ -258,7 +260,7 @@ void ABSGameMode::StartRound()
 	GS->SetRoundNumber(RoundNumber);
 	GS->SetHunter(CurrentHunterPS, NextPS);
 	GS->SetHiderCounts(RemainingHiders, TotalHidersThisRound);
-	GS->SetRoundTimer(0.f);
+	GS->SetRoundTimer(GS->GetServerWorldTimeSeconds()+HeadStartSeconds); //Show the head-start countdown on the HUD; Begin Hunt replaces this with the round
 
 	for (TActorIterator<ABSThrowableSpawnPoint> It(GetWorld()); It; ++It) It->ResetStock();
 	
@@ -336,7 +338,10 @@ void ABSGameMode::OnRoundTimerExpired()
 void ABSGameMode::HandleHiderEliminated(ABSPlayerState* HiderPS, AActor* Eliminator)
 {
 	if (!HiderPS || (Phase != EBSRoundPhase::InProgress && Phase != EBSRoundPhase::HeadStart)) return;
-
+	
+	UE_LOG(LogBlindSight,Log,TEXT("Hider eliminated: %s by %s"),
+		*HiderPS->GetPlayerName(), Eliminator ? *Eliminator->GetName() : TEXT("nothing (disconnect)"));
+	
 	// Placement: first caught = last place (TotalHiders), last standing = 1.
 	HiderPS->SetPlacement(RemainingHiders);
 	HiderPS->SetEliminated(true);
