@@ -28,7 +28,7 @@ ABSHunterCharacter::ABSHunterCharacter()
     	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     	CameraBoom->SetupAttachment(RootComponent);
     	CameraBoom->TargetArmLength = 175.f;
-    	CameraBoom->SocketOffset = FVector(0.0f, 60.0f, 60.0f); //Raise camera above player
+    	CameraBoom->SocketOffset = FVector(0.0f, 60.0f, 30.0f); //Raise camera above player
     	CameraBoom->bUsePawnControlRotation = true;
     	
     	Camera->SetupAttachment(CameraBoom,USpringArmComponent::SocketName);
