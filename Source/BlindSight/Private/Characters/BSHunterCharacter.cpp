@@ -15,7 +15,7 @@
 #include "Kismet/KismetMaterialLibrary.h"
 #include "Materials/MaterialParameterCollection.h"
 
-ABSHunterCharacter::ABSHunterCharacter()
+ABSHunterCharacter::ABSHunterCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	VisionPostProcess = CreateDefaultSubobject<UPostProcessComponent>(TEXT("VisionPostProcess"));
 	VisionPostProcess->SetupAttachment(GetRootComponent());

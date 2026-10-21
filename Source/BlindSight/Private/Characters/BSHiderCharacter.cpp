@@ -1,4 +1,5 @@
 #include "Characters/BSHiderCharacter.h"
+#include "Characters/BSCharacterMovementComponent.h"
 #include "Abilities/BSAbilitySystemComponent.h"
 #include "Abilities/BSAttributeSet.h"
 #include "Sound/BSSoundEmitterComponent.h"
@@ -14,7 +15,7 @@
 #include "Camera/CameraComponent.h"
 
 
-ABSHiderCharacter::ABSHiderCharacter()
+ABSHiderCharacter::ABSHiderCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
@@ -40,7 +41,17 @@ void ABSHiderCharacter::Tick(float DeltaTime)
 
 void ABSHiderCharacter::UpdateNoiseTier()
 {
-	UCharacterMovementComponent* Move = GetCharacterMovement();
+	const UBSCharacterMovementComponent* BSMove = Cast<UBSCharacterMovementComponent>(GetCharacterMovement());
+	const bool bNowSprinting = BSMove && BSMove->IsSprinting();
+	if (bNowSprinting != bSprinting)
+	{
+		bSprinting = bNowSprinting;
+		if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+		{
+			if (bSprinting) ASC->AddLooseGameplayTag(BSTags::State_Sprinting);
+			else			ASC->RemoveLooseGameplayTag(BSTags::State_Sprinting);
+		}
+	}
 	const float Speed2D = GetVelocity().Size2D();
 	EBSNoiseTier NewTier = EBSNoiseTier::Still;
 	if (Speed2D > 10.f)
@@ -49,8 +60,7 @@ void ABSHiderCharacter::UpdateNoiseTier()
 		else if (bSprinting)     NewTier = EBSNoiseTier::Sprint;
 		else                     NewTier = EBSNoiseTier::Walk;
 	}
-	Move->MaxWalkSpeed = bSprinting ? SprintSpeed : WalkSpeed;
-	Move->MaxWalkSpeedCrouched = CrouchSpeed;
+	
 
 	if (NewTier != NoiseTier)
 	{
@@ -74,13 +84,24 @@ void ABSHiderCharacter::Input_Primary()
 	}
 }
 void ABSHiderCharacter::Input_Secondary()   { ServerInteract(); }
-void ABSHiderCharacter::Input_SprintStart() { ServerSetSprinting(true); }
-void ABSHiderCharacter::Input_SprintStop()  { ServerSetSprinting(false); }
+void ABSHiderCharacter::Input_SprintStart()
+{
+	if (bEliminated) return;
+	if (UBSCharacterMovementComponent* Move = Cast<UBSCharacterMovementComponent>(GetCharacterMovement()))
+			Move->bWantsToSprint = true;
+}
+void ABSHiderCharacter::Input_SprintStop()  
+{
+	if (UBSCharacterMovementComponent* Move = Cast<UBSCharacterMovementComponent>(GetCharacterMovement())) 
+		Move->bWantsToSprint = false;
+}
 void ABSHiderCharacter::Input_CrouchToggle()
 	{
 	if (bEliminated) return;
 	if (bIsCrouched)	{UnCrouch();}
-	else				{Crouch(); ServerSetSprinting(false); }
+	else				{Crouch(); 
+							if (UBSCharacterMovementComponent* Move = Cast<UBSCharacterMovementComponent>(GetCharacterMovement())) 
+								Move->bWantsToSprint = false; }
 	}
 
 void ABSHiderCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
@@ -99,27 +120,18 @@ void ABSHiderCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeig
 			ASC->RemoveLooseGameplayTag(BSTags::State_Crouching);
 }
 
-void ABSHiderCharacter::ServerSetSprinting_Implementation(bool bNewSprinting)
+void ABSHiderCharacter::BeginPlay()
 {
-	if (bEliminated) return;
-	bSprinting = bNewSprinting && !bIsCrouched;
-	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	Super::BeginPlay();
+	// Same Speeds on server andclient so predicition matches
+	if (UBSCharacterMovementComponent* Move = Cast<UBSCharacterMovementComponent>(GetCharacterMovement()))
 	{
-		if (bSprinting) ASC->AddLooseGameplayTag(BSTags::State_Sprinting);
-		else            ASC->RemoveLooseGameplayTag(BSTags::State_Sprinting);
+		Move->MaxWalkSpeed = WalkSpeed;
+		Move->MaxWalkSpeedCrouched = CrouchSpeed;
+		Move->SprintSpeed = SprintSpeed;
 	}
 }
 
-void ABSHiderCharacter::ServerToggleCrouch_Implementation()
-{
-	if (bEliminated) return;
-	if (bIsCrouched) UnCrouch(); else { bSprinting = false; Crouch(); }
-	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
-	{
-		if (bIsCrouched) ASC->AddLooseGameplayTag(BSTags::State_Crouching);
-		else             ASC->RemoveLooseGameplayTag(BSTags::State_Crouching);
-	}
-}
 
 void ABSHiderCharacter::ServerInteract_Implementation()
 {
