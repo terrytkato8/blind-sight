@@ -370,7 +370,9 @@ void ABSGameMode::EndRound(EBSRoundEndReason Reason)
 	Phase = EBSRoundPhase::RoundOver;
 	ABSGameState* GS = GetBSGameState();
 	GS->SetRoundTimer(0.f);
-
+	
+	if (bAutoContinueRounds) GS-> SetRoundTimer(GS->GetServerWorldTimeSeconds() + RoundOverSeconds);
+	
 	TArray<FBSRoundScoreEntry> Results = ResolveScoring(Reason);
 	GS->SetLastRoundResults(Results);
 
