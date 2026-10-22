@@ -44,8 +44,8 @@ public:
 	FBSOnSoundEmitted OnSoundEmitted;
 
 private:
-	float ComputePerceivedIntensity(const FBSSoundEvent& Event, const FVector& ListenerLocation, bool& bOutOccluded) const;
-	int32 CountBlockingSurfaces(const FVector& From, const FVector& To, AActor* IgnoreA, AActor* IgnoreB) const;
+	float ComputePerceivedIntensity(const FBSSoundEvent& Event, const FVector& ListenerLocation, bool& bOutOccluded, bool bDebugDraw = false) const;
+	int32 CountBlockingSurfaces(const FVector& From, const FVector& To, AActor* IgnoreA, AActor* IgnoreB, bool bDebugDraw = false) const;
 
 	UPROPERTY() TObjectPtr<UBSSoundProfile> SoundProfile;
 };

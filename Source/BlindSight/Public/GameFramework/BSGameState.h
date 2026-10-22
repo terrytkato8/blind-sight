@@ -31,7 +31,7 @@ public:
 	/** Seconds left on the round clock (Blackout). 0 if no timer. */
 	UFUNCTION(BlueprintPure, Category = "Blind Sight") float GetRoundTimeRemaining() const;
 	UFUNCTION(BlueprintPure, Category = "Blind Sight") const TArray<FBSRoundScoreEntry>& GetLastRoundResults() const { return LastRoundResults; }
-
+	UFUNCTION(BlueprintPure, Category = "Blind Sight") TArray<ABSPlayerState*> GetPlayersByTotalPoints() const;
 	// Server API (called by GameMode)
 	void SetPhase(EBSRoundPhase NewPhase);
 	void SetRoundTimer(float EndServerTime) { RoundEndServerTime = EndServerTime; }

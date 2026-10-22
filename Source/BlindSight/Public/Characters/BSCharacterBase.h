@@ -25,7 +25,7 @@ class BLINDSIGHT_API ABSCharacterBase : public ACharacter, public IAbilitySystem
 	GENERATED_BODY()
 
 public:
-	ABSCharacterBase();
+	ABSCharacterBase(const FObjectInitializer& ObjectInitializer);
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UBSAttributeSet* GetAttributeSet() const;

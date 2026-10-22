@@ -11,9 +11,11 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Characters/BSCharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
-ABSCharacterBase::ABSCharacterBase()
+ABSCharacterBase::ABSCharacterBase(const FObjectInitializer& ObjectInitializer) 
+		: Super(ObjectInitializer.SetDefaultSubobjectClass<UBSCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;

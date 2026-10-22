@@ -25,7 +25,8 @@ void UBSSoundEmitterComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	const float Moved = bGrounded ? FVector::Dist2D(Loc, LastLocation) : 0.f;
 	LastLocation = Loc;
 
-	if (CurrentTier == EBSNoiseTier::Still || Moved <= KINDA_SMALL_NUMBER) { DistanceAccum = 0.f; return; }
+	if (CurrentTier == EBSNoiseTier::Still) { DistanceAccum = 0.f; return; }// actually stopped JRB 10.20.26
+	if (Moved <= KINDA_SMALL_NUMBER) return; //no move arrived this frame (common under lag); keep the stride progress
 
 	DistanceAccum += Moved;
 	float Stride = StrideWalk; EBSSoundEventType Type = EBSSoundEventType::FootstepWalk;

@@ -24,7 +24,7 @@ void ABSDoor::Interact_Implementation(AActor* InstigatorActor)
 {
 	if (!HasAuthority()) return;
 	bOpen = !bOpen;
-	UBSSoundEventSubsystem::EmitSound(this, EBSSoundEventType::Door, GetActorLocation(), InstigatorActor);
+	UBSSoundEventSubsystem::EmitSound(this, EBSSoundEventType::Door, Mesh->Bounds.Origin, InstigatorActor);
 }
 
 void ABSDoor::Tick(float DeltaTime)

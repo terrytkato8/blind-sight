@@ -2,6 +2,7 @@
 #include "Sound/BSSoundEventSubsystem.h"
 #include "Sound/BSSoundProfile.h"
 #include "Components/AudioComponent.h"
+#include "GameFramework/BSPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
@@ -23,6 +24,20 @@ float ABSGameState::GetRoundTimeRemaining() const
 {
 	if (RoundEndServerTime <= 0.f) return 0.f;
 	return FMath::Max(0.f, RoundEndServerTime - GetServerWorldTimeSeconds());
+}
+
+TArray<ABSPlayerState*> ABSGameState::GetPlayersByTotalPoints() const
+{
+	TArray<ABSPlayerState*> OutPlayers;
+	for (APlayerState* PS : PlayerArray)
+	{
+		if (ABSPlayerState* BPS = Cast<ABSPlayerState>(PS)) OutPlayers.Add(BPS);
+	}
+	OutPlayers.StableSort([](const ABSPlayerState& A, const ABSPlayerState& B)
+	{
+		return A.GetTotalPoints() > B.GetTotalPoints();
+	});
+	return OutPlayers;
 }
 
 void ABSGameState::SetPhase(EBSRoundPhase NewPhase)

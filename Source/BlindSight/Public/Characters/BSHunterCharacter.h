@@ -18,7 +18,7 @@ class BLINDSIGHT_API ABSHunterCharacter : public ABSCharacterBase
 	GENERATED_BODY()
 
 public:
-	ABSHunterCharacter();
+	ABSHunterCharacter(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

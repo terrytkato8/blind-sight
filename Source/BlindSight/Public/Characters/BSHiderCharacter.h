@@ -16,7 +16,7 @@ class BLINDSIGHT_API ABSHiderCharacter : public ABSCharacterBase
 	GENERATED_BODY()
 
 public:
-	ABSHiderCharacter();
+	ABSHiderCharacter(const FObjectInitializer& ObjectInitializer);
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -56,8 +56,7 @@ protected:
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 	
 	
-	UFUNCTION(Server, Reliable) void ServerSetSprinting(bool bNewSprinting);
-	UFUNCTION(Server, Reliable) void ServerToggleCrouch();
+	virtual void BeginPlay() override;
 	UFUNCTION(Server, Reliable) void ServerInteract();
 	
 	void UpdateNoiseTier();
