@@ -7,7 +7,9 @@
 #include "BlindSight.h"
 #include "EngineUtils.h"
 #include "GameFramework/Pawn.h"
+#include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
+
 
 void UBSSoundEventSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -85,7 +87,7 @@ void UBSSoundEventSubsystem::EmitSoundEvent(const FBSSoundEvent& Event)
 		FVector ListenerLoc = Pawn->GetActorLocation() + FVector(0.f, 0.f, 60.f);	// ear height
 
 		bool bOccluded = false;
-		const float Perceived = ComputePerceivedIntensity(Event, ListenerLoc, bOccluded);
+		const float Perceived = ComputePerceivedIntensity(Event, ListenerLoc, bOccluded, PC->bDebugDrawPings);
 		if (Perceived < SoundProfile->MinPerceivedIntensity) continue;
 
 		FBSSoundPing Ping;
@@ -99,7 +101,7 @@ void UBSSoundEventSubsystem::EmitSoundEvent(const FBSSoundEvent& Event)
 	}
 }
 
-float UBSSoundEventSubsystem::ComputePerceivedIntensity(const FBSSoundEvent& Event, const FVector& ListenerLocation, bool& bOutOccluded) const
+float UBSSoundEventSubsystem::ComputePerceivedIntensity(const FBSSoundEvent& Event, const FVector& ListenerLocation, bool& bOutOccluded, bool bDebugDraw) const
 {
 	const float Dist = FVector::Dist(Event.Origin, ListenerLocation);
 	if (Dist >= Event.Radius) { bOutOccluded = false; return 0.f; }
@@ -107,7 +109,9 @@ float UBSSoundEventSubsystem::ComputePerceivedIntensity(const FBSSoundEvent& Eve
 	const float Norm = 1.f - (Dist / Event.Radius);
 	float Perceived = Event.Intensity * FMath::Pow(Norm, SoundProfile->FalloffExponent);
 
-	const int32 Surfaces = CountBlockingSurfaces(Event.Origin, ListenerLocation, Event.Instigator.Get(), nullptr);
+	//Life floor-level origins (throw impacts, door pivots) so the trace doesn't start inside the floor
+	const FVector TraceFrom = Event.Origin + FVector(0.f,0.f, 50.f);
+	const int32 Surfaces = CountBlockingSurfaces(TraceFrom, ListenerLocation, Event.Instigator.Get(), nullptr, bDebugDraw);
 	bOutOccluded = Surfaces > 0;
 	if (Surfaces > 0)
 	{
@@ -117,7 +121,7 @@ float UBSSoundEventSubsystem::ComputePerceivedIntensity(const FBSSoundEvent& Eve
 	return FMath::Clamp(Perceived, 0.f, 1.f);
 }
 
-int32 UBSSoundEventSubsystem::CountBlockingSurfaces(const FVector& From, const FVector& To, AActor* IgnoreA, AActor* IgnoreB) const
+int32 UBSSoundEventSubsystem::CountBlockingSurfaces(const FVector& From, const FVector& To, AActor* IgnoreA, AActor* IgnoreB,bool bDebugDraw) const
 {
 	// Approximates "thick wall vs thin wall" by counting distinct blocking hits along the line.
 	// Level designers can also add Audio Volumes / custom occlusion channels later (GDD §8, §10).
@@ -137,7 +141,21 @@ int32 UBSSoundEventSubsystem::CountBlockingSurfaces(const FVector& From, const F
 	for (int32 Step = 0; Step < 4; ++Step)	// cap at 4 surfaces
 	{
 		FHitResult Hit;
-		if (!World->LineTraceSingleByChannel(Hit, Start, To, ECC_Visibility, Params)) break;
+		
+		// if (!World->LineTraceSingleByChannel(Hit, Start, To, ECC_Visibility, Params)) break;
+		const bool bHit = World->LineTraceSingleByChannel(Hit, Start, To, ECC_Visibility, Params);
+		#if !UE_BUILD_SHIPPING
+		if (bDebugDraw)
+		{
+			DrawDebugLine(World, Start, bHit ? Hit.ImpactPoint : To, bHit ? FColor::Red : FColor::Green, false,2.f, 0, 1.5f);
+			if (bHit )
+			{
+				DrawDebugPoint(World, Hit.ImpactPoint, 12.f, FColor::Red, false, 2.f);
+				UE_LOG(LogBlindSight, Log, TEXT("Occluded by %s / %s"), *GetNameSafe(Hit.GetActor()), *GetNameSafe(Hit.GetComponent()));
+			}
+		}
+		#endif
+		if (!bHit) break;
 		++Count;
 		Start = Hit.ImpactPoint + Dir * 10.f;
 		if (FVector::DistSquared(Start, To) < 100.f) break;
