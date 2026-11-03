@@ -18,6 +18,7 @@ void ABSGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ABSGameState, NextHunterPlayerState);
 	DOREPLIFETIME(ABSGameState, ModeDisplayName);
 	DOREPLIFETIME(ABSGameState, LastRoundResults);
+	DOREPLIFETIME(ABSGameState, bMatchOver);
 }
 
 float ABSGameState::GetRoundTimeRemaining() const

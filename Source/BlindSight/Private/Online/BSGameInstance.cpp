@@ -4,6 +4,7 @@
 #include "Online/OnlineSessionNames.h"
 #include "Kismet/GameplayStatics.h"
 #include "BlindSight.h"
+#include "Interfaces/OnlineIdentityInterface.h"
 
 static const FName BS_SESSION_NAME = NAME_GameSession;
 
@@ -22,6 +23,25 @@ IOnlineSessionPtr UBSGameInstance::GetSessionInterface() const
 {
 	IOnlineSubsystem* OSS = IOnlineSubsystem::Get();
 	return OSS ? OSS->GetSessionInterface() : nullptr;
+}
+
+void UBSGameInstance::LoginEOS(const FString& Type, const FString& Id, const FString& Token)
+{
+	IOnlineSubsystem* OSS = IOnlineSubsystem::Get();
+	IOnlineIdentityPtr Identity = OSS ? OSS->GetIdentityInterface() : nullptr;
+	if (!Identity.IsValid()) { OnLoginComplete.Broadcast(false); return; }
+	if (Identity->GetLoginStatus(0) == ELoginStatus::LoggedIn) {OnLoginComplete.Broadcast(true); return; }
+	LoginHandle = Identity->AddOnLoginCompleteDelegate_Handle(0, FOnLoginCompleteDelegate::CreateUObject(this, &UBSGameInstance::HandleLogin));
+	Identity->Login(0, FOnlineAccountCredentials(Type, Id, Token));
+}
+
+void UBSGameInstance::HandleLogin(int32 LocalUserNum, bool bOk, const FUniqueNetId& UserId, const FString& Error)
+{
+	if (IOnlineSubsystem* OSS = IOnlineSubsystem::Get())
+		if (IOnlineIdentityPtr Identity = OSS->GetIdentityInterface())
+			Identity->ClearOnLoginCompleteDelegate_Handle(0, LoginHandle);
+	if (!bOk) UE_LOG(LogBlindSight, Warning, TEXT("EOS Login Failed: %s"), *Error);
+	OnLoginComplete.Broadcast(bOk);
 }
 
 void UBSGameInstance::HostSession(const FString& LobbyMap, int32 MaxPlayers, bool bLAN)

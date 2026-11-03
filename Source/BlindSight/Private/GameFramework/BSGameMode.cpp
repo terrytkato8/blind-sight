@@ -258,6 +258,7 @@ void ABSGameMode::StartRound()
 
 	ABSGameState* GS = GetBSGameState();
 	GS->SetRoundNumber(RoundNumber);
+	GS->SetMatchOver(false);
 	GS->SetHunter(CurrentHunterPS, NextPS);
 	GS->SetHiderCounts(RemainingHiders, TotalHidersThisRound);
 	GS->SetRoundTimer(GS->GetServerWorldTimeSeconds()+HeadStartSeconds); //Show the head-start countdown on the HUD; Begin Hunt replaces this with the round
@@ -370,6 +371,8 @@ void ABSGameMode::EndRound(EBSRoundEndReason Reason)
 	Phase = EBSRoundPhase::RoundOver;
 	ABSGameState* GS = GetBSGameState();
 	GS->SetRoundTimer(0.f);
+	
+	GS->SetMatchOver(RoundNumber >= GetDefault<UBSGameSettings>()->RoundsPerMatch);
 	
 	if (bAutoContinueRounds) GS-> SetRoundTimer(GS->GetServerWorldTimeSeconds() + RoundOverSeconds);
 	

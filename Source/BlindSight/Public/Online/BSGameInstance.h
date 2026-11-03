@@ -31,10 +31,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Blind Sight|Online")
 	void LeaveSession();
+	
+	
 
 	UPROPERTY(BlueprintAssignable) FBSOnSessionResult OnHostComplete;
 	UPROPERTY(BlueprintAssignable) FBSOnSessionsFound OnFindComplete;
 	UPROPERTY(BlueprintAssignable) FBSOnSessionResult OnJoinComplete;
+	
 
 private:
 	void HandleCreate(FName SessionName, bool bOk);
@@ -44,4 +47,16 @@ private:
 	IOnlineSessionPtr GetSessionInterface() const;
 	TSharedPtr<FOnlineSessionSearch> SearchSettings;
 	FString PendingLobbyMap;
+	
+	/** EOS */
+public:
+	
+	UFUNCTION(BlueprintCallable, Category = "Blind Sight|Online")
+	void LoginEOS(const FString& Type = TEXT("accountportal"), const FString& Id = TEXT(""), const FString& Token = TEXT(""));
+	
+	UPROPERTY(BlueprintAssignable) FBSOnSessionResult OnLoginComplete;
+
+private:
+	void HandleLogin(int32 LocalUserNum, bool bOk, const FUniqueNetId& UserId, const FString& Error);
+	FDelegateHandle LoginHandle;
 };

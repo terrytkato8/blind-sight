@@ -28,6 +28,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Blind Sight") ABSPlayerState* GetNextHunterPlayerState() const { return NextHunterPlayerState; }
 	UFUNCTION(BlueprintPure, Category = "Blind Sight") FText GetModeDisplayName() const { return ModeDisplayName; }
 	UFUNCTION(BlueprintPure, Category = "Blind Sight") bool HasRoundTimer() const { return RoundEndServerTime > 0.f; }
+	UFUNCTION(BlueprintPure, Category = "Blind Sight") bool IsMatchOver() const {return bMatchOver;}
+	void SetMatchOver(bool bOver) { bMatchOver = bOver;}
 	/** Seconds left on the round clock (Blackout). 0 if no timer. */
 	UFUNCTION(BlueprintPure, Category = "Blind Sight") float GetRoundTimeRemaining() const;
 	UFUNCTION(BlueprintPure, Category = "Blind Sight") const TArray<FBSRoundScoreEntry>& GetLastRoundResults() const { return LastRoundResults; }
@@ -60,6 +62,7 @@ protected:
 	UPROPERTY(Replicated) TObjectPtr<ABSPlayerState> NextHunterPlayerState;
 	UPROPERTY(Replicated) FText ModeDisplayName;
 	UPROPERTY(ReplicatedUsing = OnRep_LastRoundResults) TArray<FBSRoundScoreEntry> LastRoundResults;
+	UPROPERTY(Replicated) bool bMatchOver = false;
 
 	UFUNCTION() void OnRep_Phase();
 	UFUNCTION() void OnRep_RemainingHiders();
