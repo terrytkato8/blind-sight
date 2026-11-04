@@ -127,4 +127,5 @@ struct FBSRoundScoreEntry
 	UPROPERTY(BlueprintReadOnly) bool bSurvived = false;
 	UPROPERTY(BlueprintReadOnly) int32 Placement = 0;	// Manhunt: 1 = Survivor
 	UPROPERTY(BlueprintReadOnly) bool bIsSurvivorCallout = false;
+	UPROPERTY(BlueprintReadOnly) int32 TotalPoints = 0;
 };

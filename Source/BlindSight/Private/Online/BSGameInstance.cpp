@@ -82,6 +82,8 @@ void UBSGameInstance::FindSessions(bool bLAN)
 	// SEARCH_PRESENCE is deprecated as of 5.6 and stops being a valid key next release.
 	// Lobby discovery is driven by bUseLobbiesIfAvailable on the session settings instead.
 	SearchSettings->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
+	//EOS rejects an empty lobby search; filter on the build tag every host sets
+	SearchSettings->QuerySettings.Set(FName("BS_BUILD"), FString("mvp"), EOnlineComparisonOp::Equals);
 	S->FindSessions(0, SearchSettings.ToSharedRef());
 }
 

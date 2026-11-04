@@ -41,6 +41,7 @@ TArray<FBSRoundScoreEntry> ABSGameMode_Blackout::ResolveScoring(EBSRoundEndReaso
 			E.PointsAwarded = E.bSurvived ? Share : 0;
 		}
 		if (Reason != EBSRoundEndReason::Aborted) PS->AddPoints(E.PointsAwarded);
+		E.TotalPoints = PS->GetTotalPoints();
 		Out.Add(E);
 	}
 	return Out;

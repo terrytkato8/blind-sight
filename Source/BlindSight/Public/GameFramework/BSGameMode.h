@@ -65,6 +65,7 @@ public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	virtual FString InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal) override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 	virtual void Logout(AController* Exiting) override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
@@ -100,4 +101,6 @@ protected:
 	UPROPERTY() TObjectPtr<ABSPlayerState> CurrentHunterPS;
 
 	FTimerHandle HeadStartTimer, RoundTimer, RoundOverTimer, AutoStartTimer;
+private:
+	void SetupArrivingPlayer(AController* C);
 };

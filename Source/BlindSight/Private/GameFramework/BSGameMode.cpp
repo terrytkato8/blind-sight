@@ -132,16 +132,36 @@ void ABSGameMode::SubmitResultsToBackend(const TArray<FBSRoundScoreEntry>& Resul
 	}
 }
 
-// ---------------- Players ----------------
-void ABSGameMode::PostLogin(APlayerController* NewPlayer)
+void ABSGameMode::SetupArrivingPlayer(AController* C)
 {
-	Super::PostLogin(NewPlayer);
-	if (ABSPlayerState* PS = NewPlayer->GetPlayerState<ABSPlayerState>())
+	if (ABSPlayerState* PS = C ? C->GetPlayerState<ABSPlayerState>():nullptr)
 	{
 		PS->SetRotationIndex(NextRotationIndex++);
 		PS->SetBSRole(EBSRole::None);
 	}
 	if (Phase == EBSRoundPhase::Lobby && bAutoStartWhenReady) TryAutoStart();
+}
+
+// ---------------- Players ----------------
+void ABSGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+	SetupArrivingPlayer(NewPlayer);
+}
+
+void ABSGameMode::HandleSeamlessTravelPlayer(AController*& C)
+{
+	Super::HandleSeamlessTravelPlayer(C);
+	UE_LOG(LogBlindSight, Log, TEXT("Seamless travel player arrived: %s"), *GetNameSafe(C));
+	SetupArrivingPlayer(C);
+	
+	// The host already started from the lobby, so don't wait for MinPlayersToStart (that's for open matchmaking).
+	if (Phase == EBSRoundPhase::Lobby && GetNumPlayers() >= 2 && !GetWorldTimerManager().IsTimerActive(AutoStartTimer))
+	{
+		GetWorldTimerManager().SetTimer(AutoStartTimer, this, &ABSGameMode::StartRound, AutoStartDelaySeconds, false);
+	}
+	
+	
 }
 
 void ABSGameMode::Logout(AController* Exiting)
