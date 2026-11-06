@@ -48,9 +48,14 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlaySoundEvent(EBSSoundEventType Type, FVector Location, float Intensity);
 
+	/** LastRoundResults sorted by runnning total, highest first. Safe on clients (comes in the same replicated array. */
+	UFUNCTION(BlueprintPure, Category = "BlindSight")
+	TArray<FBSRoundScoreEntry> GetLastRoundResultsByTotal() const;
+	
 	UPROPERTY(BlueprintAssignable) FBSOnPhaseChanged OnPhaseChanged;
 	UPROPERTY(BlueprintAssignable) FBSOnRemainingHidersChanged OnRemainingHidersChanged;
 	UPROPERTY(BlueprintAssignable) FBSOnRoundResults OnRoundResults;
+	
 
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_Phase) EBSRoundPhase Phase = EBSRoundPhase::Lobby;

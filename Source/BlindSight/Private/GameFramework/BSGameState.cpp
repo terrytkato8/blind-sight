@@ -1,4 +1,6 @@
 #include "GameFramework/BSGameState.h"
+
+#include "AudioMixerBlueprintLibrary.h"
 #include "Sound/BSSoundEventSubsystem.h"
 #include "Sound/BSSoundProfile.h"
 #include "Components/AudioComponent.h"
@@ -45,6 +47,16 @@ void ABSGameState::SetPhase(EBSRoundPhase NewPhase)
 {
 	Phase = NewPhase;
 	OnRep_Phase();
+}
+
+TArray<FBSRoundScoreEntry> ABSGameState::GetLastRoundResultsByTotal() const
+{
+	TArray<FBSRoundScoreEntry> Sorted = LastRoundResults;
+	Sorted.StableSort([](const FBSRoundScoreEntry& A, const FBSRoundScoreEntry& B)
+	{
+		return A.TotalPoints > B.TotalPoints;
+	});
+	return Sorted;
 }
 
 void ABSGameState::OnRep_Phase()            { OnPhaseChanged.Broadcast(Phase); }

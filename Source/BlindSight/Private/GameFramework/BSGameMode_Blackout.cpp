@@ -31,6 +31,8 @@ TArray<FBSRoundScoreEntry> ABSGameMode_Blackout::ResolveScoring(EBSRoundEndReaso
 		FBSRoundScoreEntry E;
 		E.PlayerName = PS->GetPlayerName();
 		E.Role = PS->GetBSRole();
+		E.Catches = PS->GetCatchesThisRound();
+		
 		if (PS->GetBSRole() == EBSRole::Hunter)
 		{
 			E.PointsAwarded = UBSScoringLibrary::BlackoutHunterPoints(Scoring, TotalHidersThisRound, PS->GetCatchesThisRound(), bAllCaught);
