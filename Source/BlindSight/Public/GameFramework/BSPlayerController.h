@@ -42,10 +42,23 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Blind Sight") UBSHUDWidgetBase* GetActiveHUD() const { return ActiveHUD; }
 
+	// ---- Lobby: call these from the owning player's machine (ready pad, vote spot, host UI). ----
+	UFUNCTION(BlueprintCallable, Category = "Blind Sight|Lobby") void SetLobbyReady(bool bReady);
+	/** MapIndex is an index into the lobby game state's map options; -1 clears the vote. */
+	UFUNCTION(BlueprintCallable, Category = "Blind Sight|Lobby") void VoteLobbyMap(int32 MapIndex);
+	/** Host only; ignored for everyone else and while the lobby isn't ready. */
+	UFUNCTION(BlueprintCallable, Category = "Blind Sight|Lobby") void RequestStartMatch();
+	/** True only for the listen-server host's own controller. Use this to decide who sees the host UI. */
+	UFUNCTION(BlueprintPure, Category = "Blind Sight|Lobby") bool IsLobbyHost() const { return HasAuthority() && IsLocalController(); }
+
 	/** Console: server-only shortcut to start the next round from a listen server. */
 	UFUNCTION(Exec) void BSStartRound();
 
 protected:
+	UFUNCTION(Server, Reliable) void ServerSetLobbyReady(bool bReady);
+	UFUNCTION(Server, Reliable) void ServerVoteLobbyMap(int32 MapIndex);
+	UFUNCTION(Server, Reliable) void ServerRequestStartMatch();
+
 	void ShowHUDForRole(EBSRole InRole);
 	void DoSpectate();
 

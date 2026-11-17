@@ -10,6 +10,7 @@ class UBSAbilitySystemComponent;
 class UBSAttributeSet;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBSOnRoleChanged, EBSRole, NewRole);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBSOnLobbyPlayerChanged);
 
 /** Owns the ASC so it persists across repossession during role rotation. Holds session score + round state. */
 UCLASS()
@@ -36,6 +37,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Blind Sight") const FString& GetBackendPlayerId() const { return BackendPlayerId; }
 	void SetBackendPlayerId(const FString& In) { BackendPlayerId = In; }
 
+	// ---- Lobby (ready-up + map vote). Reset naturally on travel: not copied to the match PlayerState. ----
+	UFUNCTION(BlueprintPure, Category = "Blind Sight|Lobby") bool IsLobbyReady() const { return bLobbyReady; }
+	/** Index into the lobby's map options, or -1 for no vote. */
+	UFUNCTION(BlueprintPure, Category = "Blind Sight|Lobby") int32 GetLobbyMapVote() const { return LobbyMapVote; }
+	void SetLobbyReady(bool bNew);
+	void SetLobbyMapVote(int32 MapIndex);
+
 	// Per-round stats gathered for telemetry and progression.
 	void AddShotFired() { ++ShotsFiredThisRound; }
 	void AddThrowableUsed() { ++ThrowablesUsedThisRound; }
@@ -55,6 +63,8 @@ public:
 	void ResetForRound();
 
 	UPROPERTY(BlueprintAssignable) FBSOnRoleChanged OnRoleChanged;
+	/** Fires on every machine when this player's ready state or map vote changes. */
+	UPROPERTY(BlueprintAssignable, Category = "Blind Sight|Lobby") FBSOnLobbyPlayerChanged OnLobbyPlayerChanged;
 
 protected:
 	UPROPERTY(VisibleAnywhere) TObjectPtr<UBSAbilitySystemComponent> AbilitySystemComponent;
@@ -67,10 +77,13 @@ protected:
 	UPROPERTY(Replicated) int32 CatchesThisRound = 0;
 	UPROPERTY(Replicated) int32 RotationIndex = 0;
 	UPROPERTY(Replicated) int32 HunterTurnsTaken = 0;
+	UPROPERTY(ReplicatedUsing = OnRep_Lobby) bool bLobbyReady = false;
+	UPROPERTY(ReplicatedUsing = OnRep_Lobby) int32 LobbyMapVote = -1;
 	UPROPERTY() FString BackendPlayerId;
 	int32 ShotsFiredThisRound = 0;
 	int32 ThrowablesUsedThisRound = 0;
 	float SurvivalSeconds = 0.f;
 
 	UFUNCTION() void OnRep_Role();
+	UFUNCTION() void OnRep_Lobby();
 };

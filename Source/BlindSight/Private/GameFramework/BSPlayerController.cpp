@@ -1,6 +1,7 @@
 #include "GameFramework/BSPlayerController.h"
 #include "GameFramework/BSGameState.h"
 #include "GameFramework/BSGameMode.h"
+#include "GameFramework/BSLobbyGameMode.h"
 #include "GameFramework/BSPlayerState.h"
 #include "UI/BSHUDWidgets.h"
 #include "Blueprint/UserWidget.h"
@@ -71,4 +72,25 @@ void ABSPlayerController::ClientShowResults_Implementation()
 void ABSPlayerController::BSStartRound()
 {
 	if (ABSGameMode* GM = GetWorld()->GetAuthGameMode<ABSGameMode>()) GM->StartRound();
+}
+
+// ---------------- Lobby ----------------
+
+void ABSPlayerController::SetLobbyReady(bool bReady) { ServerSetLobbyReady(bReady); }
+void ABSPlayerController::VoteLobbyMap(int32 MapIndex) { ServerVoteLobbyMap(MapIndex); }
+void ABSPlayerController::RequestStartMatch() { ServerRequestStartMatch(); }
+
+void ABSPlayerController::ServerSetLobbyReady_Implementation(bool bReady)
+{
+	if (ABSLobbyGameMode* GM = GetWorld()->GetAuthGameMode<ABSLobbyGameMode>()) GM->SetPlayerReady(GetPlayerState<ABSPlayerState>(), bReady);
+}
+
+void ABSPlayerController::ServerVoteLobbyMap_Implementation(int32 MapIndex)
+{
+	if (ABSLobbyGameMode* GM = GetWorld()->GetAuthGameMode<ABSLobbyGameMode>()) GM->SetPlayerMapVote(GetPlayerState<ABSPlayerState>(), MapIndex);
+}
+
+void ABSPlayerController::ServerRequestStartMatch_Implementation()
+{
+	if (ABSLobbyGameMode* GM = GetWorld()->GetAuthGameMode<ABSLobbyGameMode>()) GM->RequestStartMatch(this);
 }

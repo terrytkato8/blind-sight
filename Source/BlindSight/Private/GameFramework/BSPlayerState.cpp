@@ -26,6 +26,8 @@ void ABSPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ABSPlayerState, CatchesThisRound);
 	DOREPLIFETIME(ABSPlayerState, RotationIndex);
 	DOREPLIFETIME(ABSPlayerState, HunterTurnsTaken);
+	DOREPLIFETIME(ABSPlayerState, bLobbyReady);
+	DOREPLIFETIME(ABSPlayerState, LobbyMapVote);
 }
 
 void ABSPlayerState::SetBSRole(EBSRole NewRole)
@@ -54,3 +56,19 @@ void ABSPlayerState::ResetForRound()
 }
 
 void ABSPlayerState::OnRep_Role() { OnRoleChanged.Broadcast(BSRole); }
+
+void ABSPlayerState::SetLobbyReady(bool bNew)
+{
+	if (!HasAuthority() || bLobbyReady == bNew) return;
+	bLobbyReady = bNew;
+	OnRep_Lobby();	// listen server / local
+}
+
+void ABSPlayerState::SetLobbyMapVote(int32 MapIndex)
+{
+	if (!HasAuthority() || LobbyMapVote == MapIndex) return;
+	LobbyMapVote = MapIndex;
+	OnRep_Lobby();	// listen server / local
+}
+
+void ABSPlayerState::OnRep_Lobby() { OnLobbyPlayerChanged.Broadcast(); }
