@@ -7,6 +7,7 @@
 
 class UBSHUDWidgetBase;
 class UUserWidget;
+class UBSSkillDefinition;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBSOnSoundPing, const FBSSoundPing&, Ping);
 
@@ -51,6 +52,10 @@ public:
 	/** True only for the listen-server host's own controller. Use this to decide who sees the host UI. */
 	UFUNCTION(BlueprintPure, Category = "Blind Sight|Lobby") bool IsLobbyHost() const { return HasAuthority() && IsLocalController(); }
 
+	//---- Skill: call these from the owning player's machine (lobby skill picker). ----
+	UFUNCTION(BlueprintCallable, Category = "Blind Sight|Skills") void EquipSkill(UBSSkillDefinition* Skill);
+	UFUNCTION(BlueprintCallable, Category = "Blind Sight|Skills") void UnEquipSkill(UBSSkillDefinition* Skill);
+	
 	/** Console: server-only shortcut to start the next round from a listen server. */
 	UFUNCTION(Exec) void BSStartRound();
 
@@ -58,7 +63,9 @@ protected:
 	UFUNCTION(Server, Reliable) void ServerSetLobbyReady(bool bReady);
 	UFUNCTION(Server, Reliable) void ServerVoteLobbyMap(int32 MapIndex);
 	UFUNCTION(Server, Reliable) void ServerRequestStartMatch();
-
+	UFUNCTION(Server, Reliable) void ServerEquipSkill(UBSSkillDefinition* Skill);
+	UFUNCTION(Server, Reliable) void ServerUnEquipSkill(UBSSkillDefinition* Skill);
+	
 	void ShowHUDForRole(EBSRole InRole);
 	void DoSpectate();
 

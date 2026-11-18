@@ -7,6 +7,8 @@
 #include "Blueprint/UserWidget.h"
 #include "DrawDebugHelpers.h"
 #include "TimerManager.h"
+#include "Core/BSGameSettings.h"
+#include "Abilities/Skills/BSSkillDefinition.h"
 
 void ABSPlayerController::ClientReceiveSoundPing_Implementation(const FBSSoundPing& Ping)
 {
@@ -28,6 +30,8 @@ void ABSPlayerController::ClientOnRoleAssigned_Implementation(EBSRole NewRole)
 	GetWorldTimerManager().ClearTimer(SpectateTimer);
 	ShowHUDForRole(NewRole);
 }
+
+
 
 void ABSPlayerController::ShowHUDForRole(EBSRole InRole)
 {
@@ -80,6 +84,7 @@ void ABSPlayerController::SetLobbyReady(bool bReady) { ServerSetLobbyReady(bRead
 void ABSPlayerController::VoteLobbyMap(int32 MapIndex) { ServerVoteLobbyMap(MapIndex); }
 void ABSPlayerController::RequestStartMatch() { ServerRequestStartMatch(); }
 
+
 void ABSPlayerController::ServerSetLobbyReady_Implementation(bool bReady)
 {
 	if (ABSLobbyGameMode* GM = GetWorld()->GetAuthGameMode<ABSLobbyGameMode>()) GM->SetPlayerReady(GetPlayerState<ABSPlayerState>(), bReady);
@@ -93,4 +98,26 @@ void ABSPlayerController::ServerVoteLobbyMap_Implementation(int32 MapIndex)
 void ABSPlayerController::ServerRequestStartMatch_Implementation()
 {
 	if (ABSLobbyGameMode* GM = GetWorld()->GetAuthGameMode<ABSLobbyGameMode>()) GM->RequestStartMatch(this);
+}
+
+// ---------------- Skills ----------------
+
+void ABSPlayerController::EquipSkill(UBSSkillDefinition* Skill) { ServerEquipSkill(Skill); }
+void ABSPlayerController::UnEquipSkill(UBSSkillDefinition* Skill) { ServerUnEquipSkill(Skill); }
+
+void ABSPlayerController::ServerEquipSkill_Implementation(UBSSkillDefinition* Skill)
+{
+	// Loadouts can only be changed in the lobby.
+	if (!GetWorld()->GetAuthGameMode<ABSLobbyGameMode>()) return;
+	
+	// Only accept skills from the project's catalogue. Never trust what a client sends.
+	const UBSGameSettings* Settings = GetDefault<UBSGameSettings>();
+	if (!Skill || !Settings->AvailableSkills.Contains(TSoftObjectPtr<UBSSkillDefinition>(Skill))) return;
+	
+	if (ABSPlayerState* PS = GetPlayerState<ABSPlayerState>()) PS->EquipSkill(Skill);
+}
+void ABSPlayerController::ServerUnEquipSkill_Implementation(UBSSkillDefinition* Skill)
+{
+	if (!GetWorld()->GetAuthGameMode<ABSLobbyGameMode>()) return;
+	if (ABSPlayerState* PS = GetPlayerState<ABSPlayerState>()) PS->UnEquipSkill(Skill);
 }

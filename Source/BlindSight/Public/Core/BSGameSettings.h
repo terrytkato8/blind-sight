@@ -5,6 +5,7 @@
 #include "BSGameSettings.generated.h"
 
 class UBSSoundProfile;
+class UBSSkillDefinition;
 
 /** Project Settings > Game > Blind Sight. */
 UCLASS(Config = Game, DefaultConfig, meta = (DisplayName = "Blind Sight"))
@@ -23,6 +24,10 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Lobby", meta = (ClampMin = "2", ClampMax = "8"))
 	int32 MaxPlayers = 8;
+	
+	/** Every skill players may equip. The server refuses anything not listed here. */
+	UPROPERTY(Config, EditAnywhere, Category = "Skills")
+	TArray<TSoftObjectPtr<UBSSkillDefinition>> AvailableSkills;
 
 	/** Base URL of the Blind Sight backend service, e.g. https://api.blindsight.game */
 	UPROPERTY(Config, EditAnywhere, Category = "Backend")

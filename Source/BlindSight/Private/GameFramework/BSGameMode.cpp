@@ -290,6 +290,8 @@ void ABSGameMode::StartRound()
 	
 	RespawnAll(Players);
 	for (ABSPlayerState* PS : Players) InitRoundAttributes(PS, TotalHidersThisRound);
+	
+	for (ABSPlayerState* PS : Players) PS->ApplySkillsForRound();
 
 	// Hunter is frozen (blind + still) while Hiders scatter (GDD §5 step 2).
 	if (ABSCharacterBase* HunterChar = Cast<ABSCharacterBase>(CurrentHunterPS->GetPawn())) HunterChar->SetHeadStartFrozen(true);
