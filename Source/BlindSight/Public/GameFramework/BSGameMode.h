@@ -38,6 +38,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Blind Sight|Round") bool bAutoContinueRounds = true;
 	UPROPERTY(EditDefaultsOnly, Category = "Blind Sight|Round") float AutoStartDelaySeconds = 8.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Blind Sight|Round") FText ModeDisplayName;
+	/** Map everyone returns to after the last round of the match. */
+	UPROPERTY(EditDefaultsOnly, Category = "Blind Sight|Round") FString LobbyMapName = TEXT("L_Lobby01");
+	/** Game mode the lobby runs (BP_GM_Lobby). Must be set, or a leftover ?game= from the match URL wins.*/
+	UPROPERTY(EditDefaultsOnly, Category = "Blind Sight|Round") TSubclassOf<AGameModeBase> LobbyModeClass;
 
 	// ---- Round control ----
 	UFUNCTION(BlueprintCallable, Category = "Blind Sight") virtual void StartRound();
@@ -101,6 +105,9 @@ protected:
 	UPROPERTY() TObjectPtr<ABSPlayerState> CurrentHunterPS;
 
 	FTimerHandle HeadStartTimer, RoundTimer, RoundOverTimer, AutoStartTimer;
+	
+	FTimerHandle ReturnToLobbyTimer;
+	void ReturnToLobby();
 private:
 	void SetupArrivingPlayer(AController* C);
 };

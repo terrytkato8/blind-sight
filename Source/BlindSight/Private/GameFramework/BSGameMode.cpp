@@ -28,6 +28,7 @@ ABSGameMode::ABSGameMode()
 	DefaultPawnClass = nullptr;	// nobody spawns until a round starts
 	bStartPlayersAsSpectators = true;
 	ModeDisplayName = NSLOCTEXT("BlindSight", "ModeBase", "Blind Sight");
+	bUseSeamlessTravel = true;
 }
 
 void ABSGameMode::BeginPlay()
@@ -424,7 +425,8 @@ void ABSGameMode::EndRound(EBSRoundEndReason Reason)
 		{
 			B->FlushTelemetry();
 		}
-		UE_LOG(LogBlindSight, Log, TEXT("Match %s complete after %d rounds."), *MatchId, RoundNumber);
+		UE_LOG(LogBlindSight, Log, TEXT("Match %s complete after %d rounds."), *MatchId, RoundNumber, false);
+		GetWorldTimerManager().SetTimer(ReturnToLobbyTimer,this,&ABSGameMode::ReturnToLobby,RoundNumber);
 		return;
 	}
 
@@ -433,4 +435,16 @@ void ABSGameMode::EndRound(EBSRoundEndReason Reason)
 		GetWorldTimerManager().SetTimer(RoundOverTimer, this, &ABSGameMode::StartRound, RoundOverSeconds, false);
 	}
 	UE_LOG(LogBlindSight, Log, TEXT("Round %d ended (%d). Remaining hiders=%d"), RoundNumber, int32(Reason), RemainingHiders);
+}
+
+void ABSGameMode::ReturnToLobby()
+{
+	if (LobbyMapName.IsEmpty() || !LobbyModeClass)
+	{
+		UE_LOG(LogBlindSight, Warning, TEXT("ReturnToLobby: LobbyMapName or LobbyModeClass not set on %s."), *GetClass()->GetName());
+		return;
+	}
+	const FString URL = FString::Printf(TEXT("%s?game=%s?listen"), *LobbyMapName, *LobbyModeClass->GetPathName());
+	UE_LOG(LogBlindSight, Log, TEXT("Match over, returning to lobby: %s"), *LobbyMapName);
+	GetWorld()->ServerTravel(URL, false);
 }

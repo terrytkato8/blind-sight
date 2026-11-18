@@ -46,16 +46,27 @@ void UBSGA_Fire::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const 
 			ActorInfo->IsNetAuthority() ? TEXT("Server"): TEXT("Client"), Attr->GetAmmo());
 	}
 	
-	FVector Start; FRotator Rot;
-	Hunter->GetActorEyesViewPoint(Start, Rot);
-	FVector Dir = Rot.Vector();
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(BSFire), true, Hunter);
+	
+	// 1. Aim: find what the center of the camera is pointing at.
+	const FVector CamStart = Hunter->Camera->GetComponentLocation();
+	const FVector CamEnd = CamStart + Hunter->Camera->GetForwardVector() * Range;
+	FHitResult AimHit;
+	const FVector AimTarget = World->LineTraceSingleByChannel(AimHit,CamStart,CamEnd,ECC_Pawn, Params)
+		? AimHit.ImpactPoint: CamEnd;
+	
+	// 2. Shoot: from the Hunter's eyes toward that point
+	FVector Start; FRotator UnusedRot;
+	Hunter->GetActorEyesViewPoint(Start,UnusedRot);
+	FVector Dir = (AimTarget - Start).GetSafeNormal();
+	
 	if (SpreadDegrees > 0.f)
 	{
 		Dir = FMath::VRandCone(Dir, FMath::DegreesToRadians(SpreadDegrees));
 	}
 	const FVector End = Start + Dir * Range;
 
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(BSFire), true, Hunter);
+	
 	FHitResult Hit;
 	const bool bHit = World->LineTraceSingleByChannel(Hit, Start, End, ECC_Pawn, Params);
 

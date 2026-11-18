@@ -23,6 +23,7 @@ public:
 	virtual void InitGameState() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
+	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 
 	/** Maps players can vote for. The first entry is used until someone votes. Fill in on BP_GM_Lobby. */
 	UPROPERTY(EditDefaultsOnly, Category = "Blind Sight|Lobby") TArray<FBSLobbyMapOption> MapOptions;

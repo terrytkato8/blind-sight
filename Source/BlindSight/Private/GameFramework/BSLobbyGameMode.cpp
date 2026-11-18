@@ -35,6 +35,12 @@ void ABSLobbyGameMode::Logout(AController* Exiting)
 	Super::Logout(Exiting);
 }
 
+void ABSLobbyGameMode::HandleSeamlessTravelPlayer(AController*& C)
+{
+	Super::HandleSeamlessTravelPlayer(C);
+	RefreshLobbyState();
+}
+
 void ABSLobbyGameMode::SetPlayerReady(ABSPlayerState* PS, bool bReady)
 {
 	if (!PS) return;
